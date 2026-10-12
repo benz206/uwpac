@@ -1,44 +1,53 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-@custom-variant dark (&:where(.dark, .dark *));
+@custom-variant dark (@media (prefers-color-scheme: dark));
 
 :root {
-  --background: #fafaf9;
-  --foreground: #1c1917;
-  --muted: #78716c;
-  --card: #ffffff;
-  --border: #e7e5e4;
-  --accent: #eab308;
-  --tone-quiet: #16a34a;
+  --background: oklch(0.985 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --border: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --radius: 0.625rem;
+  --tone-quiet: #059669;
   --tone-light: #65a30d;
   --tone-moderate: #d97706;
   --tone-busy: #ea580c;
-  --tone-packed: #dc2626;
+  --tone-packed: #e11d48;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0c0a09;
-    --foreground: #f5f5f4;
-    --muted: #a8a29e;
-    --card: #1c1917;
-    --border: #292524;
-    --accent: #facc15;
-    --tone-quiet: #4ade80;
+    --background: oklch(0.145 0 0);
+    --foreground: oklch(0.985 0 0);
+    --card: oklch(0.205 0 0);
+    --card-foreground: oklch(0.985 0 0);
+    --muted: oklch(0.269 0 0);
+    --muted-foreground: oklch(0.708 0 0);
+    --border: oklch(1 0 0 / 10%);
+    --ring: oklch(0.556 0 0);
+    --tone-quiet: #34d399;
     --tone-light: #a3e635;
     --tone-moderate: #fbbf24;
     --tone-busy: #fb923c;
-    --tone-packed: #f87171;
+    --tone-packed: #fb7185;
   }
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-muted: var(--muted);
   --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);
-  --color-accent: var(--accent);
+  --color-ring: var(--ring);
   --color-quiet: var(--tone-quiet);
   --color-light: var(--tone-light);
   --color-moderate: var(--tone-moderate);
@@ -46,17 +55,29 @@
   --color-packed: var(--tone-packed);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
 }
 
 .cell-closed {
   background-image: repeating-linear-gradient(
     135deg,
     transparent 0 4px,
-    color-mix(in srgb, var(--muted) 25%, transparent) 4px 6px
+    color-mix(in oklch, var(--muted-foreground) 22%, transparent) 4px 6px
   );
 }

@@ -2,9 +2,6 @@ import { loadLive } from "@/lib/data";
 import { FACILITY_BY_ID } from "@/lib/facilities";
 import { occupancyPct } from "@/lib/analysis";
 
-export const dynamic = "force-static";
-export const revalidate = 60;
-
 export async function GET() {
   const { fetchedAt, readings } = await loadLive();
   return Response.json({

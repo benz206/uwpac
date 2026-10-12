@@ -1,4 +1,7 @@
-import { crowdLevel, hourLabel, HOURS } from "@/lib/analysis";
+import { CrowdBadge } from "@/components/crowd-badge";
+import { HourlyChart } from "@/components/hourly-chart";
+import { NumberTicker } from "@/components/motion/number-ticker";
+import { crowdLevel } from "@/lib/analysis";
 import type { Facility } from "@/lib/facilities";
 
 interface Props {
@@ -11,78 +14,51 @@ interface Props {
   currentHour: number;
 }
 
-const TONE_TEXT = {
-  quiet: "text-quiet",
-  light: "text-light",
-  moderate: "text-moderate",
-  busy: "text-busy",
-  packed: "text-packed",
-};
-
-const TONE_BG = {
-  quiet: "bg-quiet",
-  light: "bg-light",
-  moderate: "bg-moderate",
-  busy: "bg-busy",
-  packed: "bg-packed",
-};
-
 function comparison(pct: number, typical: number | null) {
-  if (typical == null) return "No history for this hour yet";
+  if (typical == null) return { text: "No history for this hour yet", tone: "text-muted-foreground" };
   const diff = pct - typical;
-  if (Math.abs(diff) < 8) return `About usual (~${typical}%)`;
-  return diff < 0 ? `Quieter than usual (~${typical}%)` : `Busier than usual (~${typical}%)`;
+  if (Math.abs(diff) < 8) return { text: `About usual · ~${typical}%`, tone: "text-muted-foreground" };
+  return diff < 0
+    ? { text: `↓ Quieter than usual · ~${typical}%`, tone: "text-quiet" }
+    : { text: `↑ Busier than usual · ~${typical}%`, tone: "text-packed" };
 }
 
 export function FacilityCard({ facility, count, max, pct, typicalNow, typicalToday, currentHour }: Props) {
-  const level = crowdLevel(pct);
+  const crowd = crowdLevel(pct);
+  const vsUsual = comparison(pct, typicalNow);
   return (
-    <article className="flex flex-col gap-4 rounded-xl border border-border bg-card p-5">
+    <article className="flex flex-col gap-5 rounded-2xl border border-black/8 bg-white/60 p-5 dark:border-white/10 dark:bg-white/[0.02]">
       <div className="flex items-start justify-between gap-3">
-        <div>
-          <h2 className="font-semibold leading-tight">{facility.shortName}</h2>
-          <p className="text-xs text-muted">{facility.name}</p>
+        <div className="min-w-0">
+          <h2 className="truncate text-[15px] font-medium tracking-tight">{facility.shortName}</h2>
+          <p className="truncate text-[12.5px] text-muted-foreground">{facility.name}</p>
         </div>
-        <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${TONE_TEXT[level.tone]} bg-current/10`}>
-          {level.label}
-        </span>
-      </div>
-
-      <div className="flex items-end gap-3">
-        <span className={`text-5xl font-semibold tabular-nums tracking-tight ${TONE_TEXT[level.tone]}`}>
-          {pct}%
-        </span>
-        <span className="pb-1.5 text-sm text-muted tabular-nums">
-          {count} / {max}
-        </span>
-      </div>
-
-      <div className="h-1.5 w-full overflow-hidden rounded-full bg-border">
-        <div className={`h-full rounded-full ${TONE_BG[level.tone]}`} style={{ width: `${pct}%` }} />
+        <CrowdBadge crowd={crowd} />
       </div>
 
       <div>
-        <p className="mb-2 text-xs text-muted">{comparison(pct, typicalNow)}</p>
-        <div className="flex h-10 items-end gap-px" aria-label="Typical occupancy today by hour">
-          {HOURS.map((hour, i) => {
-            const value = typicalToday[i];
-            const isNow = hour === currentHour;
-            return (
-              <div
-                key={hour}
-                title={value == null ? `${hourLabel(hour)}: no data` : `${hourLabel(hour)}: ~${value}%`}
-                className={`flex-1 rounded-sm ${
-                  isNow ? TONE_BG[crowdLevel(value ?? 0).tone] : "bg-muted/25"
-                }`}
-                style={{ height: `${Math.max(6, value ?? 0)}%` }}
-              />
-            );
-          })}
+        <div className="flex items-end justify-between gap-3">
+          <NumberTicker
+            value={pct}
+            suffix="%"
+            className="text-5xl font-medium leading-none tracking-tight"
+          />
+          <span className="pb-1 font-mono text-[12.5px] tabular-nums text-muted-foreground">
+            {count} / {max}
+          </span>
         </div>
-        <div className="mt-1 flex justify-between text-[10px] text-muted">
-          <span>{hourLabel(HOURS[0])}</span>
-          <span>{hourLabel(HOURS[HOURS.length - 1])}</span>
+        <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-black/5 dark:bg-white/10">
+          <div
+            className="h-full origin-left rounded-full transition-[width] duration-700"
+            style={{ width: `${pct}%`, background: `var(--tone-${crowd.tone})` }}
+          />
         </div>
+        <p className={`mt-2 text-[12.5px] font-medium ${vsUsual.tone}`}>{vsUsual.text}</p>
+      </div>
+
+      <div className="border-t border-black/5 pt-4 dark:border-white/10">
+        <p className="mb-2 text-[12px] text-muted-foreground">Typical today</p>
+        <HourlyChart values={typicalToday} currentHour={currentHour} />
       </div>
     </article>
   );
