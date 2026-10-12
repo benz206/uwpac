@@ -1,8 +1,6 @@
 import { Heatmap } from "@/components/heatmap";
 import { loadSummary } from "@/lib/data";
 
-export const revalidate = 300;
-
 export default async function HeatmapPage() {
   const summary = await loadSummary();
   return (

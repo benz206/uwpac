@@ -253,7 +253,7 @@ export function useChartMotion() {
 }
 
 export function useIntroStartedAt() {
-  const [introStartedAt] = React.useState(() => Date.now());
+  const [introStartedAt] = React.useState(() => performance.now());
   return introStartedAt;
 }
 
@@ -435,7 +435,7 @@ export function RevealMask({
   reduce?: boolean;
 }) {
   // eslint-disable-next-line react-hooks/purity -- one-shot intro is anchored to mount time
-  const elapsed = Date.now() - introStartedAt;
+  const elapsed = performance.now() - introStartedAt;
   const durationMs = REVEAL_DURATION * 1000;
   const finished = reduce || elapsed >= durationMs;
   const from = elapsed <= 0 ? 0 : Math.min(1, elapsed / durationMs);
@@ -588,7 +588,7 @@ function getBarGrowAnimation({
   const startMs = index * BAR_STAGGER * 1000;
   const durationMs = BAR_GROW * 1000;
   const endMs = startMs + durationMs;
-  const elapsed = Date.now() - introStartedAt;
+  const elapsed = performance.now() - introStartedAt;
 
   if (elapsed >= endMs) return null;
 

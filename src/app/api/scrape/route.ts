@@ -1,3 +1,5 @@
+import { revalidateTag } from "next/cache";
+import { localDate } from "@/lib/analysis";
 import { addReadings, rebuildSummary } from "@/lib/data";
 import { fetchLive } from "@/lib/scrape";
 import type { Reading } from "@/lib/summary";
@@ -19,6 +21,8 @@ export async function GET(request: Request) {
   };
   await addReadings([reading]);
   const summary = await rebuildSummary(now);
+  revalidateTag("summary", "max");
+  revalidateTag(`day:${localDate(now)}`, "max");
 
   return Response.json({ reading, totalReadings: summary.totalReadings });
 }

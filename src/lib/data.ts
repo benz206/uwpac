@@ -1,9 +1,8 @@
+import { cacheLife, cacheTag } from "next/cache";
 import postgres from "postgres";
 import { TIMEZONE } from "./facilities";
 import { fetchLive, type LiveReading } from "./scrape";
 import { RECENT_DAYS, summaryFromBuckets, type Bucket, type Reading, type Summary } from "./summary";
-
-const LIVE_TTL = 60;
 
 const sql = postgres(process.env.DATABASE_URL!);
 
@@ -13,11 +12,18 @@ export async function createTables() {
 }
 
 export async function loadSummary(): Promise<Summary | null> {
+  "use cache: remote";
+  cacheLife("scrape");
+  cacheTag("summary");
   const [row] = await sql<{ data: Summary }[]>`select data from summary where id = 1`;
   return row?.data ?? null;
 }
 
-export async function loadDay(isoDate: string): Promise<Reading[]> {
+export async function loadDay(isoDate: string, complete: boolean): Promise<Reading[]> {
+  "use cache: remote";
+  if (complete) cacheLife("max");
+  else cacheLife("scrape");
+  cacheTag(`day:${isoDate}`);
   const rows = await sql<{ t: Date; o: Reading["o"] }[]>`
     select t, o from readings
     where t >= (${isoDate}::date::timestamp at time zone ${TIMEZONE})
@@ -70,6 +76,8 @@ export interface LiveSnapshot {
 }
 
 export async function loadLive(): Promise<LiveSnapshot> {
-  const readings = await fetchLive({ next: { revalidate: LIVE_TTL } });
+  "use cache";
+  cacheLife("live");
+  const readings = await fetchLive();
   return { fetchedAt: new Date().toISOString(), readings };
 }

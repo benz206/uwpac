@@ -1,5 +1,6 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
+import { Suspense } from "react";
 import { DayView } from "@/components/day-view";
 import { localDate, shiftDate, toLocal } from "@/lib/analysis";
 import { loadDay, loadSummary } from "@/lib/data";
@@ -17,7 +18,22 @@ function formatDate(isoDate: string) {
   });
 }
 
-export default async function DayPage({ searchParams }: PageProps<"/day">) {
+export default function DayPage({ searchParams }: PageProps<"/day">) {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex flex-col gap-6">
+          <div className="h-[60px] w-80 max-w-full animate-pulse rounded-2xl bg-black/5 dark:bg-white/5" />
+          <div className="h-[460px] animate-pulse rounded-2xl bg-black/5 dark:bg-white/5" />
+        </div>
+      }
+    >
+      <DayContent searchParams={searchParams} />
+    </Suspense>
+  );
+}
+
+async function DayContent({ searchParams }: Pick<PageProps<"/day">, "searchParams">) {
   const params = await searchParams;
   const now = new Date();
   const today = localDate(now);
@@ -25,7 +41,7 @@ export default async function DayPage({ searchParams }: PageProps<"/day">) {
   const facility = typeof params.f === "string" && isFacilityId(params.f) ? params.f : FACILITIES[0].id;
   const local = toLocal(now);
 
-  const [readings, summary] = await Promise.all([date > today ? [] : loadDay(date), loadSummary()]);
+  const [readings, summary] = await Promise.all([date > today ? [] : loadDay(date, date < today), loadSummary()]);
 
   const navLink = (offset: number, label: string, Icon: typeof ChevronLeft) => (
     <Link

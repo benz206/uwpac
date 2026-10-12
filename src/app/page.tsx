@@ -5,8 +5,6 @@ import { loadLive, loadSummary } from "@/lib/data";
 import { FACILITIES, isSlotOpen } from "@/lib/facilities";
 import { pickAggregate } from "@/lib/typical";
 
-export const revalidate = 60;
-
 export default async function LivePage() {
   const [live, summary] = await Promise.all([
     loadLive().catch((error: Error) => ({ error })),

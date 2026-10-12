@@ -6,12 +6,14 @@ import { TextStates } from "@/components/spectrumui/text-states";
 
 export function AutoRefresh({ fetchedAt, intervalMs = 60_000 }: { fetchedAt: string; intervalMs?: number }) {
   const router = useRouter();
-  const [now, setNow] = useState(() => Date.now());
+  const [now, setNow] = useState(() => new Date(fetchedAt).getTime());
 
   useEffect(() => {
+    const first = setTimeout(() => setNow(Date.now()), 0);
     const tick = setInterval(() => setNow(Date.now()), 5_000);
     const refresh = setInterval(() => router.refresh(), intervalMs);
     return () => {
+      clearTimeout(first);
       clearInterval(tick);
       clearInterval(refresh);
     };
