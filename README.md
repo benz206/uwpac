@@ -7,7 +7,7 @@ Built with Bun, Next.js (App Router), TypeScript, Tailwind and [Spectrum UI](htt
 ## How it works
 
 - `src/lib/scrape.ts` fetches `https://warrior.uwaterloo.ca/FacilityOccupancy` and parses each `.occupancy-card` (`canvas.occupancy-chart` carries `data-occupancy`, `.max-occupancy strong` carries capacity). No HTML parser dependency.
-- `vercel.json` schedules `GET /api/scrape` every 15 minutes. It inserts the reading into the `readings` table and rebuilds the single row in the `summary` table (per-facility 7×24 averages for all time and the last 28 days, aggregated in SQL). The route requires `Authorization: Bearer $CRON_SECRET`, which Vercel Cron sends automatically.
+- `vercel.json` schedules `GET /api/scrape` every 30 minutes. It inserts the reading into the `readings` table and rebuilds the single row in the `summary` table (per-facility 7×24 averages for all time and the last 28 days, aggregated in SQL). The route requires `Authorization: Bearer $CRON_SECRET`, which Vercel Cron sends automatically.
 - `/day?date=YYYY-MM-DD&f=<facility>` plots that day's readings against the typical curve for its weekday; for today and future days the typical curve is the prediction.
 - Caching uses Cache Components (`src/lib/data.ts`, profiles in `next.config.ts`). The summary and today's readings are cached until the next scrape, and the cron revalidates their tags after it writes. Completed days are cached indefinitely. Live readings are cached for 60 seconds; `GET /api/live` returns them as JSON.
 
@@ -35,4 +35,4 @@ curl -H "Authorization: Bearer $CRON_SECRET" localhost:3000/api/scrape   # take 
 1. Import the repo on Vercel. Framework preset: Next.js, install command `bun install`.
 2. Connect a Postgres database to the project so `DATABASE_URL` is set, and add a `CRON_SECRET` environment variable (any random string).
 3. Run `bun scripts/setup-db.ts` with `DATABASE_URL` set to create the tables.
-4. Cron jobs every 15 minutes need the Vercel Pro plan; Hobby only allows daily.
+4. Cron jobs every 30 minutes need the Vercel Pro plan; Hobby only allows daily.

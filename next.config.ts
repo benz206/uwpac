@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   cacheLife: {
     live: { stale: 30, revalidate: 60, expire: 300 },
-    scrape: { stale: 60, revalidate: 900, expire: 86_400 },
+    scrape: { stale: 60, revalidate: 1800, expire: 86_400 },
   },
 };
 

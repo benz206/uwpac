@@ -34,7 +34,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2 px-4 py-4 text-[12.5px] text-muted-foreground">
             <span>Unofficial · Times are Waterloo local</span>
             <span>
-              Scraped every 15 minutes from{" "}
+              Scraped every 30 minutes from{" "}
               <a
                 className="text-foreground/80 underline-offset-4 transition-colors hover:text-foreground hover:underline"
                 href="https://warrior.uwaterloo.ca/FacilityOccupancy"
