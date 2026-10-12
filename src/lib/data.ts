@@ -1,4 +1,5 @@
 import postgres from "postgres";
+import { TIMEZONE } from "./facilities";
 import { fetchLive, type LiveReading } from "./scrape";
 import { buildSummary, type Reading, type Summary } from "./summary";
 
@@ -14,6 +15,16 @@ export async function createTables() {
 export async function loadSummary(): Promise<Summary | null> {
   const [row] = await sql<{ data: Summary }[]>`select data from summary where id = 1`;
   return row?.data ?? null;
+}
+
+export async function loadDay(isoDate: string): Promise<Reading[]> {
+  const rows = await sql<{ t: Date; o: Reading["o"] }[]>`
+    select t, o from readings
+    where t >= (${isoDate}::date::timestamp at time zone ${TIMEZONE})
+      and t < ((${isoDate}::date + 1)::timestamp at time zone ${TIMEZONE})
+    order by t
+  `;
+  return rows.map((r) => ({ t: r.t.toISOString(), o: r.o }));
 }
 
 export async function addReadings(readings: Reading[]) {

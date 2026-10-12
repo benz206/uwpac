@@ -35,6 +35,22 @@ export function toLocal(date: Date): LocalTime {
   };
 }
 
+const dateFormatter = new Intl.DateTimeFormat("en-CA", { timeZone: TIMEZONE });
+
+export function localDate(date: Date) {
+  return dateFormatter.format(date);
+}
+
+export function shiftDate(isoDate: string, days: number) {
+  const date = new Date(`${isoDate}T12:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().slice(0, 10);
+}
+
+export function weekdayOf(isoDate: string) {
+  return new Date(`${isoDate}T12:00:00Z`).getUTCDay();
+}
+
 export function occupancyPct(count: number, max: number) {
   if (max <= 0) return 0;
   return Math.min(100, Math.round((count / max) * 100));
