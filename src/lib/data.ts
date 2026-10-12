@@ -1,44 +1,44 @@
-import { createClient } from "redis";
+import postgres from "postgres";
 import { fetchLive, type LiveReading } from "./scrape";
 import { buildSummary, type Reading, type Summary } from "./summary";
 
 const LIVE_TTL = 60;
-const READINGS_KEY = "readings";
-const SUMMARY_KEY = "summary";
 
-function connect() {
-  return createClient({ url: process.env.REDIS_URL }).connect();
-}
+const sql = postgres(process.env.DATABASE_URL!);
 
-let client: ReturnType<typeof connect> | null = null;
-
-function redis() {
-  client ??= connect();
-  return client;
+export async function createTables() {
+  await sql`create table if not exists readings (t timestamptz primary key, o jsonb not null)`;
+  await sql`create table if not exists summary (id int primary key, data jsonb not null)`;
 }
 
 export async function loadSummary(): Promise<Summary | null> {
-  const text = await (await redis()).get(SUMMARY_KEY);
-  return text ? (JSON.parse(text) as Summary) : null;
+  const [row] = await sql<{ data: Summary }[]>`select data from summary where id = 1`;
+  return row?.data ?? null;
 }
 
 export async function addReadings(readings: Reading[]) {
-  await (await redis()).zAdd(
-    READINGS_KEY,
-    readings.map((r) => ({ score: Date.parse(r.t), value: JSON.stringify(r) })),
-  );
+  await sql`
+    insert into readings (t, o)
+    select t, o from jsonb_to_recordset(${sql.json(readings as unknown as postgres.JSONValue)}) as r(t timestamptz, o jsonb)
+    on conflict (t) do nothing
+  `;
 }
 
 export async function rebuildSummary(now = new Date()): Promise<Summary> {
-  const db = await redis();
-  const readings = (await db.zRange(READINGS_KEY, 0, -1)).map((line) => JSON.parse(line) as Reading);
-  const summary = buildSummary(readings, now);
-  await db.set(SUMMARY_KEY, JSON.stringify(summary));
+  const rows = await sql<{ t: Date; o: Reading["o"] }[]>`select t, o from readings order by t`;
+  const summary = buildSummary(
+    rows.map((r) => ({ t: r.t.toISOString(), o: r.o })),
+    now,
+  );
+  await sql`
+    insert into summary (id, data) values (1, ${sql.json(summary as unknown as postgres.JSONValue)})
+    on conflict (id) do update set data = excluded.data
+  `;
   return summary;
 }
 
-export async function closeRedis() {
-  if (client) await (await client).close();
+export async function closeDb() {
+  await sql.end();
 }
 
 export interface LiveSnapshot {
