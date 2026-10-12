@@ -6,6 +6,15 @@ import { RECENT_DAYS, summaryFromBuckets, type Bucket, type Reading, type Summar
 
 const sql = postgres(process.env.DATABASE_URL!);
 
+async function withConnection<T>(run: (db: postgres.Sql) => Promise<T>): Promise<T> {
+  const db = postgres(process.env.DATABASE_URL!, { max: 1 });
+  try {
+    return await run(db);
+  } finally {
+    await db.end();
+  }
+}
+
 export async function createTables() {
   await sql`create table if not exists readings (t timestamptz primary key, o jsonb not null)`;
   await sql`create table if not exists summary (id int primary key, data jsonb not null)`;
@@ -15,7 +24,7 @@ export async function loadSummary(): Promise<Summary | null> {
   "use cache: remote";
   cacheLife("scrape");
   cacheTag("summary");
-  const [row] = await sql<{ data: Summary }[]>`select data from summary where id = 1`;
+  const [row] = await withConnection((db) => db<{ data: Summary }[]>`select data from summary where id = 1`);
   return row?.data ?? null;
 }
 
@@ -24,12 +33,14 @@ export async function loadDay(isoDate: string, complete: boolean): Promise<Readi
   if (complete) cacheLife("max");
   else cacheLife("scrape");
   cacheTag(`day:${isoDate}`);
-  const rows = await sql<{ t: Date; o: Reading["o"] }[]>`
-    select t, o from readings
-    where t >= (${isoDate}::date::timestamp at time zone ${TIMEZONE})
-      and t < ((${isoDate}::date + 1)::timestamp at time zone ${TIMEZONE})
-    order by t
-  `;
+  const rows = await withConnection(
+    (db) => db<{ t: Date; o: Reading["o"] }[]>`
+      select t, o from readings
+      where t >= (${isoDate}::date::timestamp at time zone ${TIMEZONE})
+        and t < ((${isoDate}::date + 1)::timestamp at time zone ${TIMEZONE})
+      order by t
+    `,
+  );
   return rows.map((r) => ({ t: r.t.toISOString(), o: r.o }));
 }
 
