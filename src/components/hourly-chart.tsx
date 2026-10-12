@@ -48,7 +48,7 @@ export function HourlyChart({ values, currentHour }: { values: (number | null)[]
             <XAxis {...chartXAxis} dataKey="hour" interval={5} tickMargin={6} />
             <Tooltip cursor={{ fill: "currentColor", fillOpacity: 0.05 }} content={<ChartTooltipContent />} />
             <Bar dataKey="typical" name="Typical %" isAnimationActive={false} shape={shape}>
-              {HOURS.map((hour, i) => (
+              {HOURS.map((hour) => (
                 <Cell
                   key={hour}
                   fill={
