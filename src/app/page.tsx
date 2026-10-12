@@ -15,9 +15,9 @@ export default async function LivePage() {
 
   if ("error" in live) {
     return (
-      <div className="rounded-xl border border-border bg-card p-6">
-        <h1 className="font-semibold">Couldn&apos;t reach the occupancy page</h1>
-        <p className="mt-1 text-sm text-muted">{live.error.message}. Try again in a minute.</p>
+      <div className="rounded-2xl border border-black/8 bg-white/60 p-6 dark:border-white/10 dark:bg-white/[0.02]">
+        <h1 className="text-[15px] font-medium">Couldn&apos;t reach the occupancy page</h1>
+        <p className="mt-1 text-[13px] text-muted-foreground">{live.error.message}. Try again in a minute.</p>
       </div>
     );
   }
@@ -27,15 +27,17 @@ export default async function LivePage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-end justify-between gap-2">
+      <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Right now</h1>
-          <p className="text-sm text-muted">Live headcount per area, with how it usually looks at this hour.</p>
+          <h1 className="text-3xl font-medium tracking-tight">Right now</h1>
+          <p className="mt-1 text-[14px] text-muted-foreground">
+            Live headcount per area, with how it usually looks at this hour.
+          </p>
         </div>
         <AutoRefresh fetchedAt={live.fetchedAt} />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {FACILITIES.map((facility) => {
           const reading = byId.get(facility.id);
           if (!reading) return null;
