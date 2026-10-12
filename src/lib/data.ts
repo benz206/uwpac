@@ -1,7 +1,7 @@
 import postgres from "postgres";
 import { TIMEZONE } from "./facilities";
 import { fetchLive, type LiveReading } from "./scrape";
-import { buildSummary, type Reading, type Summary } from "./summary";
+import { RECENT_DAYS, summaryFromBuckets, type Bucket, type Reading, type Summary } from "./summary";
 
 const LIVE_TTL = 60;
 
@@ -36,11 +36,23 @@ export async function addReadings(readings: Reading[]) {
 }
 
 export async function rebuildSummary(now = new Date()): Promise<Summary> {
-  const rows = await sql<{ t: Date; o: Reading["o"] }[]>`select t, o from readings order by t`;
-  const summary = buildSummary(
-    rows.map((r) => ({ t: r.t.toISOString(), o: r.o })),
-    now,
-  );
+  const recentCutoff = new Date(now.getTime() - RECENT_DAYS * 86_400_000);
+  const buckets = await sql<Bucket[]>`
+    select
+      key as facility,
+      extract(dow from t at time zone ${TIMEZONE})::int as day,
+      extract(hour from t at time zone ${TIMEZONE})::int as hour,
+      t >= ${recentCutoff} as recent,
+      count(*)::int as n,
+      sum(case when (value->>1)::int <= 0 then 0
+               else least(100, floor((value->>0)::float8 / (value->>1)::float8 * 100 + 0.5)) end) as sum
+    from readings, jsonb_each(o)
+    group by 1, 2, 3, 4
+  `;
+  const [{ total, first }] = await sql<{ total: number; first: Date | null }[]>`
+    select count(*)::int as total, min(t) as first from readings
+  `;
+  const summary = summaryFromBuckets(buckets, total, first?.toISOString().replace(/\.\d{3}Z$/, "Z") ?? null, now);
   await sql`
     insert into summary (id, data) values (1, ${sql.json(summary as unknown as postgres.JSONValue)})
     on conflict (id) do update set data = excluded.data

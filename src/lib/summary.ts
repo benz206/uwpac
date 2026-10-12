@@ -1,5 +1,5 @@
 import { FACILITY_IDS, type FacilityId } from "./facilities";
-import { emptyGrid, occupancyPct, toLocal, type Grid } from "./analysis";
+import { emptyGrid, type Grid } from "./analysis";
 
 export interface Reading {
   t: string;
@@ -26,20 +26,22 @@ export interface Summary {
 
 export const RECENT_DAYS = 28;
 
-export function parseReadings(jsonl: string): Reading[] {
-  return jsonl
-    .split("\n")
-    .filter((line) => line.trim())
-    .map((line) => JSON.parse(line) as Reading);
+export interface Bucket {
+  facility: string;
+  day: number;
+  hour: number;
+  recent: boolean;
+  n: number;
+  sum: number;
 }
 
 class Accumulator {
   sum = emptyGrid(0);
   n = emptyGrid(0);
 
-  add(day: number, hour: number, pct: number) {
-    this.sum[day][hour] += pct;
-    this.n[day][hour] += 1;
+  add(day: number, hour: number, sum: number, n: number) {
+    this.sum[day][hour] += sum;
+    this.n[day][hour] += n;
   }
 
   finish(): Aggregate {
@@ -52,8 +54,12 @@ class Accumulator {
   }
 }
 
-export function buildSummary(readings: Reading[], now = new Date()): Summary {
-  const recentCutoff = now.getTime() - RECENT_DAYS * 86_400_000;
+export function summaryFromBuckets(
+  buckets: Bucket[],
+  totalReadings: number,
+  firstReading: string | null,
+  now = new Date(),
+): Summary {
   const acc = Object.fromEntries(
     FACILITY_IDS.map((id) => [
       id,
@@ -61,25 +67,17 @@ export function buildSummary(readings: Reading[], now = new Date()): Summary {
     ]),
   ) as Record<FacilityId, { all: Accumulator; recent: Accumulator }>;
 
-  let first: string | null = null;
-  for (const reading of readings) {
-    const date = new Date(reading.t);
-    if (!first || reading.t < first) first = reading.t;
-    const { day, hour } = toLocal(date);
-    const isRecent = date.getTime() >= recentCutoff;
-    for (const id of FACILITY_IDS) {
-      const value = reading.o[id];
-      if (!value) continue;
-      const pct = occupancyPct(value[0], value[1]);
-      acc[id].all.add(day, hour, pct);
-      if (isRecent) acc[id].recent.add(day, hour, pct);
-    }
+  for (const b of buckets) {
+    const facility = acc[b.facility as FacilityId];
+    if (!facility) continue;
+    facility.all.add(b.day, b.hour, b.sum, b.n);
+    if (b.recent) facility.recent.add(b.day, b.hour, b.sum, b.n);
   }
 
   return {
     updatedAt: now.toISOString(),
-    firstReading: first,
-    totalReadings: readings.length,
+    firstReading,
+    totalReadings,
     recentDays: RECENT_DAYS,
     facilities: Object.fromEntries(
       FACILITY_IDS.map((id) => [
