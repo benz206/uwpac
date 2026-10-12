@@ -1,47 +1,44 @@
-import { readFile } from "node:fs/promises";
-import path from "node:path";
+import { createClient } from "redis";
 import { fetchLive, type LiveReading } from "./scrape";
-import { parseReadings, type Reading, type Summary } from "./summary";
+import { buildSummary, type Reading, type Summary } from "./summary";
 
 const LIVE_TTL = 60;
-const HISTORY_TTL = 300;
+const READINGS_KEY = "readings";
+const SUMMARY_KEY = "summary";
 
-function remoteBase() {
-  if (process.env.DATA_BASE_URL) return process.env.DATA_BASE_URL;
-  const owner = process.env.VERCEL_GIT_REPO_OWNER;
-  const repo = process.env.VERCEL_GIT_REPO_SLUG;
-  const ref = process.env.VERCEL_GIT_COMMIT_REF ?? "main";
-  if (owner && repo) {
-    return `https://raw.githubusercontent.com/${owner}/${repo}/${ref}/data`;
-  }
-  return null;
+function connect() {
+  return createClient({ url: process.env.REDIS_URL }).connect();
 }
 
-async function loadDataFile(relative: string): Promise<string | null> {
-  const base = remoteBase();
-  if (base) {
-    const res = await fetch(`${base}/${relative}`, {
-      next: { revalidate: HISTORY_TTL },
-    });
-    if (res.status === 404) return null;
-    if (!res.ok) throw new Error(`Failed to load ${relative}: ${res.status}`);
-    return res.text();
-  }
-  try {
-    return await readFile(path.join(process.cwd(), "data", relative), "utf8");
-  } catch {
-    return null;
-  }
+let client: ReturnType<typeof connect> | null = null;
+
+function redis() {
+  client ??= connect();
+  return client;
 }
 
 export async function loadSummary(): Promise<Summary | null> {
-  const text = await loadDataFile("summary.json");
+  const text = await (await redis()).get(SUMMARY_KEY);
   return text ? (JSON.parse(text) as Summary) : null;
 }
 
-export async function loadMonth(yearMonth: string): Promise<Reading[]> {
-  const text = await loadDataFile(`readings/${yearMonth}.jsonl`);
-  return text ? parseReadings(text) : [];
+export async function addReadings(readings: Reading[]) {
+  await (await redis()).zAdd(
+    READINGS_KEY,
+    readings.map((r) => ({ score: Date.parse(r.t), value: JSON.stringify(r) })),
+  );
+}
+
+export async function rebuildSummary(now = new Date()): Promise<Summary> {
+  const db = await redis();
+  const readings = (await db.zRange(READINGS_KEY, 0, -1)).map((line) => JSON.parse(line) as Reading);
+  const summary = buildSummary(readings, now);
+  await db.set(SUMMARY_KEY, JSON.stringify(summary));
+  return summary;
+}
+
+export async function closeRedis() {
+  if (client) await (await client).close();
 }
 
 export interface LiveSnapshot {
