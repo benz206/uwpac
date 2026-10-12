@@ -1,47 +1,44 @@
-import { readFile } from "node:fs/promises";
-import path from "node:path";
+import postgres from "postgres";
 import { fetchLive, type LiveReading } from "./scrape";
-import { parseReadings, type Reading, type Summary } from "./summary";
+import { buildSummary, type Reading, type Summary } from "./summary";
 
 const LIVE_TTL = 60;
-const HISTORY_TTL = 300;
 
-function remoteBase() {
-  if (process.env.DATA_BASE_URL) return process.env.DATA_BASE_URL;
-  const owner = process.env.VERCEL_GIT_REPO_OWNER;
-  const repo = process.env.VERCEL_GIT_REPO_SLUG;
-  const ref = process.env.VERCEL_GIT_COMMIT_REF ?? "main";
-  if (owner && repo) {
-    return `https://raw.githubusercontent.com/${owner}/${repo}/${ref}/data`;
-  }
-  return null;
-}
+const sql = postgres(process.env.DATABASE_URL!);
 
-async function loadDataFile(relative: string): Promise<string | null> {
-  const base = remoteBase();
-  if (base) {
-    const res = await fetch(`${base}/${relative}`, {
-      next: { revalidate: HISTORY_TTL },
-    });
-    if (res.status === 404) return null;
-    if (!res.ok) throw new Error(`Failed to load ${relative}: ${res.status}`);
-    return res.text();
-  }
-  try {
-    return await readFile(path.join(process.cwd(), "data", relative), "utf8");
-  } catch {
-    return null;
-  }
+export async function createTables() {
+  await sql`create table if not exists readings (t timestamptz primary key, o jsonb not null)`;
+  await sql`create table if not exists summary (id int primary key, data jsonb not null)`;
 }
 
 export async function loadSummary(): Promise<Summary | null> {
-  const text = await loadDataFile("summary.json");
-  return text ? (JSON.parse(text) as Summary) : null;
+  const [row] = await sql<{ data: Summary }[]>`select data from summary where id = 1`;
+  return row?.data ?? null;
 }
 
-export async function loadMonth(yearMonth: string): Promise<Reading[]> {
-  const text = await loadDataFile(`readings/${yearMonth}.jsonl`);
-  return text ? parseReadings(text) : [];
+export async function addReadings(readings: Reading[]) {
+  await sql`
+    insert into readings (t, o)
+    select t, o from jsonb_to_recordset(${sql.json(readings as unknown as postgres.JSONValue)}) as r(t timestamptz, o jsonb)
+    on conflict (t) do nothing
+  `;
+}
+
+export async function rebuildSummary(now = new Date()): Promise<Summary> {
+  const rows = await sql<{ t: Date; o: Reading["o"] }[]>`select t, o from readings order by t`;
+  const summary = buildSummary(
+    rows.map((r) => ({ t: r.t.toISOString(), o: r.o })),
+    now,
+  );
+  await sql`
+    insert into summary (id, data) values (1, ${sql.json(summary as unknown as postgres.JSONValue)})
+    on conflict (id) do update set data = excluded.data
+  `;
+  return summary;
+}
+
+export async function closeDb() {
+  await sql.end();
 }
 
 export interface LiveSnapshot {
