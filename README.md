@@ -19,7 +19,7 @@ Built with Bun, Next.js (App Router), TypeScript and Tailwind. Deploys to Vercel
 {"t":"2026-09-07T14:04:02Z","o":{"cif":[9,100],"pac-free-weights":[50,75],"warrior-zone":[14,60],"pac-cardio":[12,50],"pac-machines":[45,40],"pac-functional":[12,25]}}
 ```
 
-`data/readings/*.jsonl` holds the history from before the move to Postgres (March and April were converted from the SQLite history in [pauligwe/PACked](https://github.com/pauligwe/PACked)). `bun scripts/setup-db.ts` creates the tables and loads it; it is safe to re-run.
+History before the move to Postgres was imported from the JSONL files this repo used to keep under `data/` (March and April were converted from the SQLite history in [pauligwe/PACked](https://github.com/pauligwe/PACked)).
 
 ## Run locally
 
@@ -34,5 +34,5 @@ curl -H "Authorization: Bearer $CRON_SECRET" localhost:3000/api/scrape   # take 
 
 1. Import the repo on Vercel. Framework preset: Next.js, install command `bun install`.
 2. Connect a Postgres database to the project so `DATABASE_URL` is set, and add a `CRON_SECRET` environment variable (any random string).
-3. Run `bun scripts/setup-db.ts` with `DATABASE_URL` set to create the tables and load the existing history.
+3. Run `bun scripts/setup-db.ts` with `DATABASE_URL` set to create the tables.
 4. Cron jobs every 15 minutes need the Vercel Pro plan; Hobby only allows daily.
