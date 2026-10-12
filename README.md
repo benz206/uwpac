@@ -1,15 +1,15 @@
 # UW PAC
 
-How busy are the University of Waterloo PAC and CIF gyms? Live occupancy, a weekly heatmap, and the quietest free hours around your Quest class schedule.
+How busy are the University of Waterloo PAC and CIF gyms? Live occupancy, a per-day view of actual vs predicted crowds, and a weekly heatmap.
 
-Built with Bun, Next.js (App Router), TypeScript and Tailwind. Deploys to Vercel; history lives in Postgres, written by a Vercel Cron job.
+Built with Bun, Next.js (App Router), TypeScript, Tailwind and [Spectrum UI](https://ui.spectrumhq.in) (a shadcn registry; components live in `src/components/spectrumui` and `src/components/motion`). Deploys to Vercel; history lives in Postgres, written by a Vercel Cron job.
 
 ## How it works
 
 - `src/lib/scrape.ts` fetches `https://warrior.uwaterloo.ca/FacilityOccupancy` and parses each `.occupancy-card` (`canvas.occupancy-chart` carries `data-occupancy`, `.max-occupancy strong` carries capacity). No HTML parser dependency.
-- `vercel.json` schedules `GET /api/scrape` every 15 minutes. It inserts the reading into the `readings` table and rebuilds the single row in the `summary` table (per-facility 7×24 averages for all time and the last 28 days). The route requires `Authorization: Bearer $CRON_SECRET`, which Vercel Cron sends automatically.
-- Pages read the summary from Postgres and revalidate every 5 minutes.
-- Live readings are fetched on demand and cached for 60 seconds. `GET /api/live` returns them as JSON.
+- `vercel.json` schedules `GET /api/scrape` every 15 minutes. It inserts the reading into the `readings` table and rebuilds the single row in the `summary` table (per-facility 7×24 averages for all time and the last 28 days, aggregated in SQL). The route requires `Authorization: Bearer $CRON_SECRET`, which Vercel Cron sends automatically.
+- `/day?date=YYYY-MM-DD&f=<facility>` plots that day's readings against the typical curve for its weekday; for today and future days the typical curve is the prediction.
+- Caching uses Cache Components (`src/lib/data.ts`, profiles in `next.config.ts`). The summary and today's readings are cached until the next scrape, and the cron revalidates their tags after it writes. Completed days are cached indefinitely. Live readings are cached for 60 seconds; `GET /api/live` returns them as JSON.
 
 ## Data format
 
