@@ -8,7 +8,7 @@ export default async function HeatmapPage() {
       <div>
         <h1 className="text-3xl font-medium tracking-tight">Weekly heatmap</h1>
         <p className="mt-1 text-[14px] text-muted-foreground">
-          Average occupancy by day and hour. Hover a cell for details.
+          Average occupancy by day and hour for every area. Hover a cell for details.
         </p>
       </div>
       {summary ? (
