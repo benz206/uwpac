@@ -8,7 +8,7 @@ const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "UW PAC — how busy is the gym?",
+  title: "UW PAC",
   description:
     "Live occupancy and weekly heatmaps for the University of Waterloo PAC and CIF gyms.",
 };
