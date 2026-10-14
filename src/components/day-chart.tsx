@@ -7,7 +7,6 @@ import {
   ChartActiveDot,
   ChartFrame,
   chartGrid,
-  ChartLegend,
   ChartPlotSurface,
   ChartTooltipContent,
   chartXAxis,
@@ -22,9 +21,10 @@ export interface DayPoint {
   predicted?: number;
 }
 
-const ACTUAL = "var(--spectrum-chart-1)";
-const PREDICTED = "var(--spectrum-chart-5)";
+export const ACTUAL = "var(--spectrum-chart-1)";
+export const PREDICTED = "var(--spectrum-chart-5)";
 const TICKS = [6, 9, 12, 15, 18, 21, 24];
+const COMPACT_TICKS = [6, 12, 18, 24];
 
 function timeLabel(x: number) {
   const hour = Math.floor(x);
@@ -36,20 +36,16 @@ export function DayChart({
   data,
   predictedLabel,
   nowHour,
+  compact = false,
 }: {
   data: DayPoint[];
   predictedLabel: string;
   nowHour: number | null;
+  compact?: boolean;
 }) {
   const id = useChartId("day");
   return (
-    <ChartFrame className="flex h-[300px] flex-col">
-      <ChartLegend
-        items={[
-          { label: "Actual", color: ACTUAL },
-          { label: predictedLabel, color: PREDICTED },
-        ]}
-      />
+    <ChartFrame className={`flex flex-col ${compact ? "h-[150px]" : "h-[300px]"}`}>
       <ChartPlotSurface>
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
@@ -62,10 +58,10 @@ export function DayChart({
               dataKey="x"
               type="number"
               domain={[FIRST_HOUR, 24]}
-              ticks={TICKS}
+              ticks={compact ? COMPACT_TICKS : TICKS}
               tickFormatter={(v: number) => hourLabel(v)}
             />
-            <YAxis {...chartYAxis} domain={[0, 100]} ticks={[0, 25, 50, 75, 100]} tickFormatter={(v: number) => `${v}%`} />
+            <YAxis {...chartYAxis} domain={[0, 100]} ticks={compact ? [0, 50, 100] : [0, 25, 50, 75, 100]} tickFormatter={(v: number) => `${v}%`} />
             <Tooltip
               cursor={{ stroke: "currentColor", strokeOpacity: 0.25 }}
               content={({ active, payload, label }) => (

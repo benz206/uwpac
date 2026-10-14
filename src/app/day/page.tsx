@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { DayView } from "@/components/day-view";
 import { localDate, shiftDate, toLocal } from "@/lib/analysis";
 import { loadDay, loadSummary } from "@/lib/data";
-import { FACILITIES, isFacilityId } from "@/lib/facilities";
+import { isFacilityId } from "@/lib/facilities";
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -38,14 +38,15 @@ async function DayContent({ searchParams }: Pick<PageProps<"/day">, "searchParam
   const now = new Date();
   const today = localDate(now);
   const date = typeof params.date === "string" && DATE_RE.test(params.date) ? params.date : today;
-  const facility = typeof params.f === "string" && isFacilityId(params.f) ? params.f : FACILITIES[0].id;
+  const facility = typeof params.f === "string" && isFacilityId(params.f) ? params.f : null;
+  const facilityParam = facility ? `&f=${facility}` : "";
   const local = toLocal(now);
 
   const [readings, summary] = await Promise.all([date > today ? [] : loadDay(date, date < today), loadSummary()]);
 
   const navLink = (offset: number, label: string, Icon: typeof ChevronLeft) => (
     <Link
-      href={`/day?date=${shiftDate(date, offset)}&f=${facility}`}
+      href={`/day?date=${shiftDate(date, offset)}${facilityParam}`}
       aria-label={label}
       className="flex size-8 items-center justify-center rounded-full border border-black/8 bg-white/60 text-muted-foreground transition-colors hover:text-foreground dark:border-white/10 dark:bg-white/[0.03]"
     >
@@ -70,7 +71,7 @@ async function DayContent({ searchParams }: Pick<PageProps<"/day">, "searchParam
           {navLink(-1, "Previous day", ChevronLeft)}
           {date !== today ? (
             <Link
-              href={`/day?f=${facility}`}
+              href={facility ? `/day?f=${facility}` : "/day"}
               className="rounded-full border border-black/8 bg-white/60 px-3 py-1.5 text-[13px] font-medium text-muted-foreground transition-colors hover:text-foreground dark:border-white/10 dark:bg-white/[0.03]"
             >
               Today
@@ -87,7 +88,7 @@ async function DayContent({ searchParams }: Pick<PageProps<"/day">, "searchParam
         nowHour={date === today ? local.hour + local.minute / 60 : null}
         readings={readings}
         summary={summary}
-        initialFacility={facility}
+        initialExpanded={facility}
       />
     </div>
   );
