@@ -13,25 +13,25 @@ const LINKS = [
 export function Nav() {
   const pathname = usePathname();
   return (
-    <nav className="flex gap-0.5 rounded-full border border-black/8 bg-white/60 p-0.5 text-[13px] dark:border-white/10 dark:bg-white/[0.03]">
+    <nav className="flex h-full gap-4 text-[13.5px] sm:gap-5">
       {LINKS.map((link) => {
         const active = pathname === link.href;
         return (
           <Link
             key={link.href}
             href={link.href}
-            className={`relative rounded-full px-3.5 py-1.5 font-medium transition-colors ${
-              active ? "text-background" : "text-muted-foreground hover:text-foreground"
+            className={`relative flex h-full items-center font-medium transition-colors ${
+              active ? "text-foreground" : "text-muted-foreground hover:text-foreground"
             }`}
           >
+            {link.label}
             {active ? (
               <motion.span
-                layoutId="nav-pill"
-                className="absolute inset-0 rounded-full bg-foreground"
+                layoutId="nav-underline"
+                className="absolute inset-x-0 -bottom-px h-0.5 bg-foreground"
                 transition={{ type: "spring", bounce: 0.2, duration: 0.45 }}
               />
             ) : null}
-            <span className="relative">{link.label}</span>
           </Link>
         );
       })}

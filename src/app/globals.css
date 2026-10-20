@@ -5,37 +5,79 @@
 @custom-variant dark (@media (prefers-color-scheme: dark));
 
 :root {
-  --background: oklch(0.985 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --border: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --radius: 0.625rem;
+  --background: #f4f2ee;
+  --foreground: #1a1a19;
+  --card: #ffffff;
+  --card-foreground: #1a1a19;
+  --popover: #ffffff;
+  --popover-foreground: #1a1a19;
+  --primary: #1a1a19;
+  --primary-foreground: #f4f2ee;
+  --secondary: #ebe8e2;
+  --secondary-foreground: #1a1a19;
+  --muted: #ebe8e2;
+  --muted-foreground: #6b6862;
+  --accent: #e4f222;
+  --accent-foreground: #1a1a19;
+  --destructive: #dc2626;
+  --border: #e2ded6;
+  --input: #e2ded6;
+  --ring: #1a1a19;
+  --radius: 0.375rem;
   --tone-quiet: #059669;
   --tone-light: #65a30d;
   --tone-moderate: #d97706;
   --tone-busy: #ea580c;
   --tone-packed: #e11d48;
+  --heat-0: #fbfde3;
+  --heat-1: #f1f8b8;
+  --heat-2: #d9f0a3;
+  --heat-3: #addd8e;
+  --heat-4: #78c679;
+  --heat-5: #41ab5d;
+  --heat-6: #238443;
+  --heat-7: #006837;
+  --heat-8: #004529;
+  --heat-ink-low: #1a1a19;
+  --heat-ink-high: #ffffff;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: oklch(0.145 0 0);
-    --foreground: oklch(0.985 0 0);
-    --card: oklch(0.205 0 0);
-    --card-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.269 0 0);
-    --muted-foreground: oklch(0.708 0 0);
-    --border: oklch(1 0 0 / 10%);
-    --ring: oklch(0.556 0 0);
+    --background: #111110;
+    --foreground: #f4f2ee;
+    --card: #1a1a18;
+    --card-foreground: #f4f2ee;
+    --popover: #1a1a18;
+    --popover-foreground: #f4f2ee;
+    --primary: #f4f2ee;
+    --primary-foreground: #111110;
+    --secondary: #252420;
+    --secondary-foreground: #f4f2ee;
+    --muted: #252420;
+    --muted-foreground: #9a968e;
+    --accent: #e4f222;
+    --accent-foreground: #111110;
+    --destructive: #f87171;
+    --border: #2c2b27;
+    --input: #2c2b27;
+    --ring: #f4f2ee;
     --tone-quiet: #34d399;
     --tone-light: #a3e635;
     --tone-moderate: #fbbf24;
     --tone-busy: #fb923c;
     --tone-packed: #fb7185;
+    --heat-0: #22251a;
+    --heat-1: #2c3519;
+    --heat-2: #384a1b;
+    --heat-3: #47611d;
+    --heat-4: #587a20;
+    --heat-5: #6f9523;
+    --heat-6: #8fb226;
+    --heat-7: #b8d226;
+    --heat-8: #e4f222;
+    --heat-ink-low: #f4f2ee;
+    --heat-ink-high: #111110;
   }
 }
 
@@ -44,6 +86,16 @@
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-input: var(--input);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);

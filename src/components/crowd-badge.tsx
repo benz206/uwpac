@@ -33,7 +33,7 @@ export function CrowdBadge({ crowd }: { crowd: Crowd }) {
   const { icon: Icon, className } = STYLES[crowd.tone];
   return (
     <span
-      className={`inline-flex shrink-0 select-none items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-1 text-[12px] font-medium leading-none ring-1 ring-inset ${className}`}
+      className={`inline-flex shrink-0 select-none items-center gap-1.5 whitespace-nowrap rounded-[5px] px-2 py-1 text-[12px] font-medium leading-none ring-1 ring-inset ${className}`}
     >
       <Icon className="size-3.5 shrink-0" strokeWidth={2.25} aria-hidden="true" />
       {crowd.label}

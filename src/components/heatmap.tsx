@@ -3,14 +3,14 @@
 import { useState } from "react";
 import { Segmented } from "@/components/segmented";
 import { TextStates } from "@/components/spectrumui/text-states";
-import { crowdLevel, dayName, hourLabel, HOURS } from "@/lib/analysis";
+import { crowdLevel, dayName, HEAT_STEPS, heatStep, hourLabel, HOURS } from "@/lib/analysis";
 import { FACILITIES, isSlotOpen, type Facility } from "@/lib/facilities";
 import type { Aggregate, Summary } from "@/lib/summary";
 import { pickAggregate } from "@/lib/typical";
 
-function heatColor(pct: number) {
-  const hue = 150 - (125 * pct) / 100;
-  return `oklch(0.72 0.17 ${hue} / ${0.22 + 0.7 * (pct / 100)})`;
+function heatStyle(pct: number) {
+  const step = heatStep(pct);
+  return { background: `var(--heat-${step})`, color: step >= 5 ? "var(--heat-ink-high)" : "var(--heat-ink-low)" };
 }
 
 const DAY_ORDER = [1, 2, 3, 4, 5, 6, 0];
@@ -27,7 +27,7 @@ function FacilityHeatmap({ facility, aggregate }: { facility: Facility; aggregat
   }
 
   return (
-    <article className="flex flex-col gap-3 rounded-2xl border border-black/8 bg-white/60 p-4 dark:border-white/10 dark:bg-white/[0.02]">
+    <article className="flex flex-col gap-3 rounded-lg border bg-card p-4">
       <div className="min-w-0">
         <h2 className="truncate text-[15px] font-medium tracking-tight">{facility.shortName}</h2>
         <p className="truncate text-[12.5px] text-muted-foreground">{facility.name}</p>
@@ -66,10 +66,10 @@ function FacilityHeatmap({ facility, aggregate }: { facility: Facility; aggregat
                     key={day}
                     aria-label={describe(day, hour)}
                     onMouseEnter={() => setHovered({ day, hour })}
-                    className={`h-5 rounded-[4px] text-center font-mono tabular-nums transition-shadow ${
-                      closed ? "cell-closed text-muted-foreground/60" : "text-foreground/80"
-                    } ${active ? "ring-2 ring-foreground/70" : ""}`}
-                    style={!closed && pct != null ? { background: heatColor(pct) } : undefined}
+                    className={`h-5 rounded-[3px] text-center font-mono tabular-nums transition-shadow ${
+                      closed ? "cell-closed text-muted-foreground/60" : ""
+                    } ${active ? "ring-2 ring-foreground" : ""}`}
+                    style={!closed && pct != null ? heatStyle(pct) : undefined}
                   >
                     {!closed && pct != null ? pct : ""}
                   </td>
@@ -119,14 +119,15 @@ export function Heatmap({ summary }: { summary: Summary }) {
 
       <div className="flex flex-wrap items-center gap-4 text-[12px] text-muted-foreground">
         <span className="flex items-center gap-1.5">
-          <span
-            className="inline-block h-2.5 w-16 rounded-full"
-            style={{ background: `linear-gradient(90deg, ${heatColor(0)}, ${heatColor(50)}, ${heatColor(100)})` }}
-          />
+          <span className="flex">
+            {HEAT_STEPS.map((_, step) => (
+              <span key={step} className="h-2.5 w-2.5 first:rounded-l-[3px] last:rounded-r-[3px]" style={{ background: `var(--heat-${step})` }} />
+            ))}
+          </span>
           quiet → packed
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="cell-closed inline-block size-2.5 rounded-[3px] ring-1 ring-black/10 dark:ring-white/15" /> closed
+          <span className="cell-closed inline-block size-2.5 rounded-[3px] ring-1 ring-border" /> closed
         </span>
         <span className="font-mono tabular-nums">{samples.toLocaleString()} readings in this view</span>
       </div>

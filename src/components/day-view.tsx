@@ -4,7 +4,8 @@ import { Maximize2, Minimize2 } from "lucide-react";
 import { useState } from "react";
 import { ACTUAL, DayChart, PREDICTED, type DayPoint } from "@/components/day-chart";
 import { NumberTicker } from "@/components/motion/number-ticker";
-import { ChartLegend, chartVarsClassName } from "@/components/spectrumui/charts/chart-kit";
+import { ChartLegend } from "@/components/spectrumui/charts/chart-kit";
+import { WeekStrip, type WeekDay } from "@/components/week-strip";
 import { FIRST_HOUR, hourLabel, HOURS, occupancyPct, toLocal, weekdayOf } from "@/lib/analysis";
 import { FACILITIES, isSlotOpen, type Facility, type FacilityId } from "@/lib/facilities";
 import type { Reading, Summary } from "@/lib/summary";
@@ -15,6 +16,7 @@ interface Props {
   today: string;
   nowHour: number | null;
   readings: Reading[];
+  week: WeekDay[];
   summary: Summary | null;
   initialExpanded: FacilityId | null;
 }
@@ -23,7 +25,7 @@ function Stat({ label, value, detail }: { label: string; value: number | null; d
   return (
     <div className="flex min-w-0 flex-col gap-1">
       <p className="truncate text-[11.5px] text-muted-foreground">{label}</p>
-      <p className="text-[20px] font-medium leading-none tracking-tight">
+      <p className="text-[22px] font-medium leading-none tracking-tight">
         {value == null ? "—" : <NumberTicker value={value} suffix="%" />}
       </p>
       <p className="truncate text-[11.5px] text-muted-foreground">{detail}</p>
@@ -40,7 +42,7 @@ function DayCard({
   summary,
   expanded,
   onToggle,
-}: Omit<Props, "initialExpanded"> & { facility: Facility; expanded: boolean; onToggle: () => void }) {
+}: Omit<Props, "initialExpanded" | "week"> & { facility: Facility; expanded: boolean; onToggle: () => void }) {
   const isPast = date < today;
   const predictedLabel = isPast ? "Typical" : "Predicted";
   const weekday = weekdayOf(date);
@@ -78,7 +80,7 @@ function DayCard({
 
   return (
     <article
-      className={`flex flex-col gap-4 rounded-2xl border border-black/8 bg-white/60 p-4 dark:border-white/10 dark:bg-white/[0.02] ${
+      className={`flex flex-col gap-4 rounded-lg border bg-card p-4 ${
         expanded ? "order-first sm:col-span-2 lg:col-span-3" : ""
       }`}
     >
@@ -125,7 +127,7 @@ function DayCard({
   );
 }
 
-export function DayView({ date, today, nowHour, readings, summary, initialExpanded }: Props) {
+export function DayView({ date, today, nowHour, readings, week, summary, initialExpanded }: Props) {
   const [expanded, setExpanded] = useState(initialExpanded);
   const predictedLabel = date < today ? "Typical" : "Predicted";
 
@@ -137,8 +139,9 @@ export function DayView({ date, today, nowHour, readings, summary, initialExpand
 
   return (
     <div className="flex flex-col gap-4">
+      <WeekStrip date={date} today={today} week={week} summary={summary} facility={expanded} />
       <ChartLegend
-        className={`mb-0 justify-start ${chartVarsClassName}`}
+        className="mt-4 mb-0 justify-start"
         items={[
           { label: "Actual", color: ACTUAL },
           { label: predictedLabel, color: PREDICTED },

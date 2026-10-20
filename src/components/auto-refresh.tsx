@@ -23,7 +23,7 @@ export function AutoRefresh({ fetchedAt, intervalMs = 60_000 }: { fetchedAt: str
   const age = seconds < 60 ? `${seconds}s ago` : `${Math.round(seconds / 60)} min ago`;
 
   return (
-    <span className="inline-flex items-center gap-2 rounded-full border border-black/8 bg-white/60 px-3 py-1.5 text-[12.5px] text-muted-foreground dark:border-white/10 dark:bg-white/[0.03]">
+    <span className="inline-flex h-8 items-center gap-2 rounded-md border bg-card px-2.5 text-[12.5px] text-muted-foreground">
       <span className="relative flex size-1.5">
         <span className="absolute inline-flex size-full animate-ping rounded-full bg-quiet opacity-60" />
         <span className="relative inline-flex size-1.5 rounded-full bg-quiet" />

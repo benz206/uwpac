@@ -21,8 +21,8 @@ export interface DayPoint {
   predicted?: number;
 }
 
-export const ACTUAL = "var(--spectrum-chart-1)";
-export const PREDICTED = "var(--spectrum-chart-5)";
+export const ACTUAL = "var(--foreground)";
+export const PREDICTED = "var(--muted-foreground)";
 const TICKS = [6, 9, 12, 15, 18, 21, 24];
 const COMPACT_TICKS = [6, 12, 18, 24];
 

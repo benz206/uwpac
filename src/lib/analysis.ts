@@ -82,3 +82,15 @@ export function dayName(day: number) {
 export function emptyGrid<T>(fill: T): Grid<T> {
   return Array.from({ length: 7 }, () => Array.from({ length: 24 }, () => fill));
 }
+
+const LONG_DATE: Intl.DateTimeFormatOptions = { weekday: "long", month: "long", day: "numeric", year: "numeric" };
+
+export function formatDate(isoDate: string, options = LONG_DATE) {
+  return new Date(`${isoDate}T12:00:00Z`).toLocaleDateString("en-US", { ...options, timeZone: "UTC" });
+}
+
+export const HEAT_STEPS = ["#fbfde3", "#f1f8b8", "#d9f0a3", "#addd8e", "#78c679", "#41ab5d", "#238443", "#006837", "#004529"];
+
+export function heatStep(pct: number) {
+  return Math.min(HEAT_STEPS.length - 1, Math.floor((pct / 100) * HEAT_STEPS.length));
+}

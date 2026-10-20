@@ -54,10 +54,11 @@ export function CommandMenu() {
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Search"
-        className="flex items-center gap-2 rounded-full border border-black/8 bg-white/60 py-1.5 pr-2 pl-3 text-[13px] text-muted-foreground transition-colors hover:text-foreground dark:border-white/10 dark:bg-white/[0.03]"
+        className="flex h-8 items-center gap-2 rounded-md border bg-card pr-1.5 pl-2.5 text-[13px] text-muted-foreground transition-colors hover:text-foreground"
       >
         <Search className="size-3.5" />
-        <kbd className="hidden font-sans text-[11px] tracking-widest sm:inline">⌘K</kbd>
+        <span className="hidden pr-6 sm:inline">Search</span>
+        <kbd className="hidden rounded-[4px] bg-muted px-1.5 py-0.5 font-sans text-[11px] tracking-widest sm:inline">⌘K</kbd>
       </button>
       <CommandDialog open={open} onOpenChange={setOpen} title="Search" description="Jump to a page, facility or day">
         <Command>

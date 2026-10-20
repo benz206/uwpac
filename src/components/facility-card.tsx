@@ -27,7 +27,7 @@ export function FacilityCard({ facility, count, max, pct, typicalNow, typicalTod
   const crowd = crowdLevel(pct);
   const vsUsual = comparison(pct, typicalNow);
   return (
-    <article className="flex flex-col gap-5 rounded-2xl border border-black/8 bg-white/60 p-5 dark:border-white/10 dark:bg-white/[0.02]">
+    <article className="flex flex-col gap-5 rounded-lg border bg-card p-5">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <h2 className="truncate text-[15px] font-medium tracking-tight">{facility.shortName}</h2>
@@ -41,22 +41,22 @@ export function FacilityCard({ facility, count, max, pct, typicalNow, typicalTod
           <NumberTicker
             value={pct}
             suffix="%"
-            className="text-5xl font-medium leading-none tracking-tight"
+            className="text-5xl font-medium leading-none tracking-[-0.04em]"
           />
           <span className="pb-1 font-mono text-[12.5px] tabular-nums text-muted-foreground">
             {count} / {max}
           </span>
         </div>
-        <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-black/5 dark:bg-white/10">
+        <div className="mt-3 h-1 w-full overflow-hidden rounded-[2px] bg-muted">
           <div
-            className="h-full origin-left rounded-full transition-[width] duration-700"
+            className="h-full origin-left rounded-[2px] transition-[width] duration-700"
             style={{ width: `${pct}%`, background: `var(--tone-${crowd.tone})` }}
           />
         </div>
         <p className={`mt-2 text-[12.5px] font-medium ${vsUsual.tone}`}>{vsUsual.text}</p>
       </div>
 
-      <div className="border-t border-black/5 pt-4 dark:border-white/10">
+      <div className="border-t pt-4">
         <p className="mb-2 text-[12px] text-muted-foreground">Typical today</p>
         <HourlyChart values={typicalToday} currentHour={currentHour} />
       </div>

@@ -13,7 +13,7 @@ export default async function LivePage() {
 
   if ("error" in live) {
     return (
-      <div className="rounded-2xl border border-black/8 bg-white/60 p-6 dark:border-white/10 dark:bg-white/[0.02]">
+      <div className="rounded-lg border bg-card p-6">
         <h1 className="text-[15px] font-medium">Couldn&apos;t reach the occupancy page</h1>
         <p className="mt-1 text-[13px] text-muted-foreground">{live.error.message}. Try again in a minute.</p>
       </div>
@@ -27,7 +27,7 @@ export default async function LivePage() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-medium tracking-tight">Right now</h1>
+          <h1 className="text-4xl font-medium tracking-[-0.03em]">Right now</h1>
           <p className="mt-1 text-[14px] text-muted-foreground">
             Live headcount per area, with how it usually looks at this hour.
           </p>

@@ -14,7 +14,7 @@ export function Segmented<T extends string>({
   onChange: (value: T) => void;
 }) {
   return (
-    <div className="flex flex-wrap gap-0.5 rounded-full border border-black/8 bg-white/60 p-0.5 text-[13px] dark:border-white/10 dark:bg-white/[0.03]">
+    <div className="flex flex-wrap gap-0.5 rounded-md bg-muted p-0.5 text-[13px]">
       {options.map((opt) => {
         const active = opt.value === value;
         return (
@@ -22,14 +22,14 @@ export function Segmented<T extends string>({
             key={opt.value}
             type="button"
             onClick={() => onChange(opt.value)}
-            className={`relative rounded-full px-3 py-1.5 font-medium transition-colors ${
-              active ? "text-background" : "text-muted-foreground hover:text-foreground"
+            className={`relative rounded-[5px] px-3 py-1 font-medium transition-colors ${
+              active ? "text-foreground" : "text-muted-foreground hover:text-foreground"
             }`}
           >
             {active ? (
               <motion.span
                 layoutId={id}
-                className="absolute inset-0 rounded-full bg-foreground"
+                className="absolute inset-0 rounded-[5px] bg-card shadow-[0_1px_2px_rgb(0_0_0/0.08)] ring-1 ring-border"
                 transition={{ type: "spring", bounce: 0.2, duration: 0.45 }}
               />
             ) : null}
