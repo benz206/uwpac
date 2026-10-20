@@ -134,10 +134,10 @@ export function WeekStrip({ date, today, week, summary, facility }: Props) {
                 aria-current={selected ? "date" : undefined}
                 title={label}
                 className={`relative flex flex-col gap-2 px-3 pt-3 pb-2.5 transition-colors ${
-                  selected ? "bg-accent/25 dark:bg-accent/10" : "hover:bg-muted/60"
+                  selected ? "bg-accent/10" : "hover:bg-muted/60"
                 }`}
               >
-                {selected ? <span className="absolute inset-x-0 top-0 h-0.5 bg-foreground" /> : null}
+                {selected ? <span className="absolute inset-x-0 top-0 h-0.5 bg-accent" /> : null}
                 <div className="flex items-baseline justify-between gap-1 text-[11.5px]">
                   <span className={`font-medium uppercase tracking-wide ${selected ? "text-foreground" : "text-muted-foreground"}`}>
                     {formatDate(d, { weekday: "short" })}

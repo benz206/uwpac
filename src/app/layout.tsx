@@ -34,10 +34,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-4">
             <div className="flex h-full items-center gap-5 sm:gap-8">
               <Link href="/" className="flex items-center gap-2 text-[15px] font-semibold tracking-tight">
-                <span className="flex size-6 items-end justify-center gap-[2px] rounded-[5px] bg-foreground px-[5px] pb-[5px]">
-                  <span className="h-1.5 w-[3px] rounded-[1px] bg-accent/45" />
-                  <span className="h-2.5 w-[3px] rounded-[1px] bg-accent/70" />
-                  <span className="h-3.5 w-[3px] rounded-[1px] bg-accent" />
+                <span className="flex size-7 items-end justify-center gap-[3px] rounded-md bg-accent pb-[7px]">
+                  <span className="h-[7px] w-1 rounded-[1px] bg-accent-foreground" />
+                  <span className="h-[11px] w-1 rounded-[1px] bg-accent-foreground" />
+                  <span className="h-[15px] w-1 rounded-[1px] bg-accent-foreground" />
                 </span>
                 UW PAC
               </Link>

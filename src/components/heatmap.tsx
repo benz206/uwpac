@@ -10,7 +10,7 @@ import { pickAggregate } from "@/lib/typical";
 
 function heatStyle(pct: number) {
   const step = heatStep(pct);
-  return { background: `var(--heat-${step})`, color: step >= 5 ? "var(--heat-ink-high)" : "var(--heat-ink-low)" };
+  return { background: `var(--heat-${step})`, color: `var(--heat-ink-${step})` };
 }
 
 const DAY_ORDER = [1, 2, 3, 4, 5, 6, 0];

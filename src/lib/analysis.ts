@@ -89,7 +89,7 @@ export function formatDate(isoDate: string, options = LONG_DATE) {
   return new Date(`${isoDate}T12:00:00Z`).toLocaleDateString("en-US", { ...options, timeZone: "UTC" });
 }
 
-export const HEAT_STEPS = ["#fbfde3", "#f1f8b8", "#d9f0a3", "#addd8e", "#78c679", "#41ab5d", "#238443", "#006837", "#004529"];
+export const HEAT_STEPS = ["#b5daae", "#a8d39f", "#9acc90", "#c1c081", "#ebb172", "#f69b5e", "#ff7f47", "#ec5540", "#d20f39"];
 
 export function heatStep(pct: number) {
   return Math.min(HEAT_STEPS.length - 1, Math.floor((pct / 100) * HEAT_STEPS.length));
