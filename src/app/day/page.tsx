@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { DayView } from "@/components/day-view";
 import { formatDate, localDate, shiftDate, toLocal } from "@/lib/analysis";
-import { loadDay, loadSummary } from "@/lib/data";
+import { loadSummary, loadWeek } from "@/lib/data";
 import { FACILITY_BY_ID, isFacilityId } from "@/lib/facilities";
 import { OG_BASE, ogImage } from "@/lib/site";
 import { weekStart } from "@/lib/week";
@@ -56,11 +56,10 @@ async function DayContent({ searchParams }: Pick<PageProps<"/day">, "searchParam
   const facilityParam = facility ? `&f=${facility}` : "";
   const local = toLocal(new Date());
 
-  const weekDates = Array.from({ length: 7 }, (_, i) => shiftDate(weekStart(date), i));
-  const [week, summary] = await Promise.all([
-    Promise.all(weekDates.map(async (d) => ({ date: d, readings: d > today ? [] : await loadDay(d, d < today) }))),
-    loadSummary(),
-  ]);
+  const start = weekStart(date);
+  const weekDates = Array.from({ length: 7 }, (_, i) => shiftDate(start, i));
+  const [weekReadings, summary] = await Promise.all([loadWeek(start, weekDates[6] < today), loadSummary()]);
+  const week = weekDates.map((d) => ({ date: d, readings: weekReadings.filter((r) => localDate(new Date(r.t)) === d) }));
   const readings = week.find((d) => d.date === date)!.readings;
 
   const navLink = (offset: number, label: string, Icon: typeof ChevronLeft) => (

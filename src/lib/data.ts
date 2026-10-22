@@ -1,5 +1,6 @@
 import { cacheLife, cacheTag } from "next/cache";
 import postgres from "postgres";
+import { shiftDate } from "./analysis";
 import { TIMEZONE } from "./facilities";
 import { fetchLive, type LiveReading } from "./scrape";
 import { RECENT_DAYS, summaryFromBuckets, type Bucket, type Reading, type Summary } from "./summary";
@@ -38,6 +39,22 @@ export async function loadDay(isoDate: string, complete: boolean): Promise<Readi
       select t, o from readings
       where t >= (${isoDate}::date::timestamp at time zone ${TIMEZONE})
         and t < ((${isoDate}::date + 1)::timestamp at time zone ${TIMEZONE})
+      order by t
+    `,
+  );
+  return rows.map((r) => ({ t: r.t.toISOString(), o: r.o }));
+}
+
+export async function loadWeek(start: string, complete: boolean): Promise<Reading[]> {
+  "use cache: remote";
+  if (complete) cacheLife("max");
+  else cacheLife("scrape");
+  cacheTag(...Array.from({ length: 7 }, (_, i) => `day:${shiftDate(start, i)}`));
+  const rows = await withConnection(
+    (db) => db<{ t: Date; o: Reading["o"] }[]>`
+      select t, o from readings
+      where t >= (${start}::date::timestamp at time zone ${TIMEZONE})
+        and t < ((${start}::date + 7)::timestamp at time zone ${TIMEZONE})
       order by t
     `,
   );
