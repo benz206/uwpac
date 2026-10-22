@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import { HEAT_STEPS, heatStep, HOURS } from "@/lib/analysis";
 import { loadSummary } from "@/lib/data";
 import { FACILITIES, isSlotOpen } from "@/lib/facilities";
@@ -7,6 +8,7 @@ import { pickAggregate } from "@/lib/typical";
 const DAY_ORDER = [1, 2, 3, 4, 5, 6, 0];
 
 export async function GET() {
+  await connection();
   const summary = await loadSummary();
 
   return ogResponse({
