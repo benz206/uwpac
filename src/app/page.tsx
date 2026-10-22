@@ -1,3 +1,5 @@
+import { connection } from "next/server";
+import { Suspense } from "react";
 import { AutoRefresh } from "@/components/auto-refresh";
 import { FacilityCard } from "@/components/facility-card";
 import { HOURS, occupancyPct, toLocal } from "@/lib/analysis";
@@ -5,7 +7,27 @@ import { loadLive, loadSummary } from "@/lib/data";
 import { FACILITIES, isSlotOpen } from "@/lib/facilities";
 import { pickAggregate } from "@/lib/typical";
 
-export default async function LivePage() {
+export default function LivePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex flex-col gap-6">
+          <div className="h-[60px] w-80 max-w-full animate-pulse rounded-lg bg-muted" />
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {FACILITIES.map((facility) => (
+              <div key={facility.id} className="h-[180px] animate-pulse rounded-lg bg-muted" />
+            ))}
+          </div>
+        </div>
+      }
+    >
+      <LiveContent />
+    </Suspense>
+  );
+}
+
+async function LiveContent() {
+  await connection();
   const [live, summary] = await Promise.all([
     loadLive().catch((error: Error) => ({ error })),
     loadSummary(),

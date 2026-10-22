@@ -1,9 +1,11 @@
+import { connection } from "next/server";
 import { crowdLevel, occupancyPct } from "@/lib/analysis";
 import { loadLive } from "@/lib/data";
 import { FACILITIES, TIMEZONE } from "@/lib/facilities";
 import { INK, MUTED, ogResponse, RULE, TONE_HEX } from "@/lib/og";
 
 export async function GET() {
+  await connection();
   const live = await loadLive();
   const byId = new Map(live.readings.map((r) => [r.facility, r]));
   const time = new Date(live.fetchedAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", timeZone: TIMEZONE });
