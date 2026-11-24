@@ -1,8 +1,9 @@
 import { revalidateTag } from "next/cache";
 import { localDate } from "@/lib/analysis";
-import { addReadings, rebuildSummary } from "@/lib/data";
+import { addReadings, loadSummary, loadWeek, rebuildSummary } from "@/lib/data";
 import { fetchLive } from "@/lib/scrape";
 import type { Reading } from "@/lib/summary";
+import { weekStart } from "@/lib/week";
 
 export async function GET(request: Request) {
   if (request.headers.get("authorization") !== `Bearer ${process.env.CRON_SECRET}`) {
@@ -21,8 +22,10 @@ export async function GET(request: Request) {
   };
   await addReadings([reading]);
   const summary = await rebuildSummary(now);
+  const today = localDate(now);
   revalidateTag("summary", "max");
-  revalidateTag(`day:${localDate(now)}`, "max");
+  revalidateTag(`day:${today}`, "max");
+  await Promise.all([loadSummary(), loadWeek(weekStart(today), false)]);
 
   return Response.json({ reading, totalReadings: summary.totalReadings });
 }
